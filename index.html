@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Sheet CRUD System</title>
+    <!--Bootstrap 5 CSS CDN-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!--Font Awesome Icons-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --card-bg: #ffffff;
+            --primary-accent: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            background: var(--bg-gradient);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .navbar-custom {
+            background-color: #0f172a !important;
+            padding: 16px 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .navbar-custom .navbar-brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .custom-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 32px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .custom-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .input-group-text {
+            background-color: #f8fafc;
+            border: 1.5px solid var(--border-color);
+            border-right: none;
+            color: var(--text-muted);
+            border-radius: 8px 0 0 8px;
+        }
+
+        .form-control {
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            padding: 11px 14px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+
+        .btn-custom-primary {
+            background-color: var(--primary-accent);
+            border: none;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+
+        .btn-custom-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-custom-secondary {
+            background-color: #e2e8f0;
+            border: none;
+            color: #334155;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .btn-custom-secondary:hover {
+            background-color: #cbd5e1;
+            color: #1e293b;
+        }
+
+        .action-btn {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+        }
+
+        .action-btn-edit { background-color: #fef3c7; color: #d97706; }
+        .action-btn-edit:hover { background-color: #fcd34d; transform: scale(1.05); }
+        .action-btn-delete { background-color: #fee2e2; color: #dc2626; }
+        .action-btn-delete:hover { background-color: #fca5a5; transform: scale(1.05); }
+
+        .table-responsive {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .table thead th {
+            background-color: #f8fafc;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1.5px solid var(--border-color);
+            padding: 16px 20px;
+        }
+
+        .id-badge {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-5">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1"><i class="fas fa-graduation-cap me-2"></i>Student Sheet Portal (Serverless)</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row g-4">
+            
+            <!--Left Form-->
+            <div class="col-lg-4">
+                <div class="custom-card">
+                    <h4 class="card-header-title mb-4" id="form-title">
+                        <i class="fas fa-user-plus text-primary me-2"></i>Register New Student
+                    </h4>
+
+                    <div id="alert-box" class="alert d-none align-items-center mb-3" role="alert">
+                        <i class="fas id-icon me-2"></i> <span id="alert-msg"></span>
+                    </div>
+
+                    <form id="student-form" novalidate>
+                        <input type="hidden" id="student-id" value="">
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">FULL NAME</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="name" placeholder="John Doe" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="course" class="form-label">COURSE</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-book-open"></i></span>
+                                <input type="text" class="form-control" id="course" placeholder="BS Information Technology" required>
+                            </div>
+                        </div>
+
+                        <div id="form-actions">
+                            <button type="submit" class="btn-custom-primary"><i class="fas fa-plus-circle me-1"></i> Add Student</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!--Right Table-->
+            <div class="col-lg-8">
+                <div class="custom-card">
+                    <h4 class="card-header-title mb-4"><i class="fas fa-database text-primary me-2"></i>Registered Student Directory</h4>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 15%;">ID</th>
+                                    <th scope="col" style="width: 40%;">Student Name</th>
+                                    <th scope="col" style="width: 30%;">Course / Track</th>
+                                    <th scope="col" class="text-center" style="width: 15%;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-table-body">
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-secondary">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div> Loading records...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // REPLACE WITH YOUR ACTUAL GOOGLE WEB APP URL
+        const API_URL = "https://script.google.com/macros/s/AKfycbwWuiV1qxeHqCVVcuQKv3vvhTEoIB8WY36kKTNgnEiRnq4JvebRN5fJ5Xs7CYBHAu1O/exec";
+
+        let studentsList = [];
+
+        // Load records immediately
+        document.addEventListener("DOMContentLoaded", fetchStudents);
+
+        async function fetchStudents() {
+            try {
+                const response = await fetch(`${API_URL}?action=read`);
+                studentsList = await response.json();
+                renderTable();
+            } catch (err) {
+                showAlert("danger", "Failed to load directory data.");
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById("student-table-body");
+            tbody.innerHTML = "";
+
+            if (studentsList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-secondary"><i class="fas fa-info-circle me-2"></i>No records found.</td></tr>`;
+                return;
+            }
+
+            // Display newest at the top
+            [...studentsList].reverse().forEach(student => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="id-badge">#${student.id}</span></td>
+                        <td><strong class="fw-semibold">${student.name}</strong></td>
+                        <td><span class="text-secondary">${student.course}</span></td>
+                        <td class="text-center">
+                            <div class="d-inline-flex gap-2">
+                                <span onclick="editStudent(${student.id})" class="action-btn action-btn-edit" title="Edit"><i class="fas fa-edit"></i></span>
+                                <span onclick="deleteStudent(${student.id})" class="action-btn action-btn-delete" title="Delete"><i class="fas fa-trash-alt"></i></span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById("student-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const id = document.getElementById("student-id").value;
+            const name = document.getElementById("name").value.trim();
+            const course = document.getElementById("course").value.trim();
+
+            if (!name || !course) {
+                showAlert("danger", "All fields are required!");
+                return;
+            }
+
+            const namePattern = /^[a-zA-Z\s.]+$/;
+            if (!namePattern.test(name)) {
+                showAlert("danger", "Name should only contain letters, spaces, or periods!");
+                return;
+            }
+
+            const payload = id 
+                ? { action: "update", id: parseInt(id), name, course }
+                : { action: "create", name, course };
+
+            showAlert("warning", "Saving record...");
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    showAlert("success", id ? "Record updated successfully!" : "Student registered successfully!");
+                    resetForm();
+                    fetchStudents();
+                } else {
+                    showAlert("danger", result.msg);
+                }
+            } catch (err) {
+                showAlert("danger", "Could not connect to database.");
+            }
+        });
+
+        function editStudent(id) {
+            const student = studentsList.find(s => s.id === id);
+            if (!student) return;
+
+            document.getElementById("student-id").value = student.id;
+            document.getElementById("name").value = student.name;
+            document.getElementById("course").value = student.course;
+
+            document.getElementById("form-title").innerHTML = `<i class="fas fa-user-edit text-warning me-2"></i>Modify Student Record`;
+            document.getElementById("form-actions").innerHTML = `
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-custom-primary" style="background-color: #d97706;"><i class="fas fa-save me-1"></i> Save Changes</button>
+                    <button type="button" onclick="resetForm()" class="btn-custom-secondary"><i class="fas fa-times-circle me-1"></i> Cancel</button>
+                </div>
+            `;
+        }
+
+        async function deleteStudent(id) {
+            if (!confirm("Are you sure you want to delete this student record?")) return;
+            showAlert("warning", "Deleting record...");
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "delete", id: id })
+                });
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    showAlert("success", "Student record deleted!");
+                    fetchStudents();
+                } else {
+                    showAlert("danger", result.msg);
+                }
+            } catch (err) {
+                showAlert("danger", "Could not delete record.");
+            }
+        }
+
+        function resetForm() {
+            document.getElementById("student-id").value = "";
+            document.getElementById("name").value = "";
+            document.getElementById("course").value = "";
+            document.getElementById("form-title").innerHTML = `<i class="fas fa-user-plus text-primary me-2"></i>Register New Student`;
+            document.getElementById("form-actions").innerHTML = `<button type="submit" class="btn-custom-primary"><i class="fas fa-plus-circle me-1"></i> Add Student</button>`;
+        }
+
+        function showAlert(type, msg) {
+            const alertBox = document.getElementById("alert-box");
+            const alertMsg = document.getElementById("alert-msg");
+            
+            alertBox.className = `alert alert-${type} d-flex align-items-center mb-3`;
+            alertMsg.textContent = msg;
+        }
+    </script>
+</body>
+</html>
