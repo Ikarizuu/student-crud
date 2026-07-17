@@ -3,43 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student List CRUD System</title>
-    <!--Bootstrap 5 CSS CDN-->
+    <title>Benilde Manila - Student Directory</title>
+    <!-- Bootstrap 5 CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!--Font Awesome Icons-->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            /* De La Salle-College of Saint Benilde Signature Color Scheme */
+            --benilde-dark: #111827;       /* Deep Obsidian Gray */
+            --benilde-green: #00A859;      /* Benilde Signature Emerald Green */
+            --benilde-green-hover: #008f4a; /* Deep Emerald */
+            --benilde-green-light: #e6f7ef; /* Ultra-soft Green Tint */
+            --bg-gradient: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             --card-bg: #ffffff;
-            --primary-accent: #2563eb;
-            --primary-hover: #1d4ed8;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-md: 0 10px 15px -3px rgba(0, 168, 89, 0.05), 0 4px 6px -4px rgba(0, 168, 89, 0.05);
         }
 
         body {
             background: var(--bg-gradient);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: var(--text-main);
             min-height: 100vh;
         }
 
+        /* Benilde Navbar Header Setup */
         .navbar-custom {
-            background-color: #0f172a !important;
-            padding: 16px 0;
-            box-shadow: var(--shadow-sm);
+            background-color: var(--benilde-dark) !important;
+            padding: 12px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            border-bottom: 4px solid var(--benilde-green);
         }
 
         .navbar-custom .navbar-brand {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 700;
             letter-spacing: -0.02em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
         }
 
+        .navbar-logo {
+            height: 42px;
+            width: auto;
+            object-fit: contain;
+            margin-right: 12px;
+        }
+
+        .navbar-brand-text {
+            color: #ffffff;
+        }
+
+        .navbar-brand-subtext {
+            color: var(--benilde-green);
+            font-weight: 400;
+            font-size: 0.85rem;
+            display: block;
+            letter-spacing: 0.05em;
+        }
+
+        /* Premium Benilde Cards styling */
         .custom-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -51,25 +78,32 @@
 
         .custom-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 25px -5px rgba(0, 168, 89, 0.1);
+            border-color: rgba(0, 168, 89, 0.2);
         }
 
         .card-header-title {
             font-size: 1.25rem;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: -0.02em;
-            color: var(--text-main);
+            color: var(--benilde-dark);
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--benilde-green);
+            padding-bottom: 8px;
+            display: inline-block;
         }
 
+        /* Modernized Form Inputs */
         .form-label {
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.75rem;
+            font-weight: 700;
             color: var(--text-main);
             margin-bottom: 6px;
+            letter-spacing: 0.05em;
         }
 
         .input-group-text {
-            background-color: #f8fafc;
+            background-color: #f9fafb;
             border: 1.5px solid var(--border-color);
             border-right: none;
             color: var(--text-muted);
@@ -82,35 +116,44 @@
             padding: 11px 14px;
             font-size: 0.95rem;
             color: var(--text-main);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .form-control:focus {
-            border-color: var(--primary-accent);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            border-color: var(--benilde-green);
+            box-shadow: 0 0 0 4px rgba(0, 168, 89, 0.15);
             outline: none;
         }
 
+        /* CSB Custom Primary Buttons */
         .btn-custom-primary {
-            background-color: var(--primary-accent);
+            background-color: var(--benilde-green);
             border: none;
             color: #ffffff;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.95rem;
             padding: 12px 24px;
             border-radius: 8px;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, transform 0.1s;
             width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
         .btn-custom-primary:hover {
-            background-color: var(--primary-hover);
+            background-color: var(--benilde-green-hover);
+            color: #ffffff;
+        }
+
+        .btn-custom-primary:active {
+            transform: scale(0.98);
         }
 
         .btn-custom-secondary {
-            background-color: #e2e8f0;
-            border: none;
-            color: #334155;
-            font-weight: 600;
+            background-color: #f3f4f6;
+            border: 1px solid var(--border-color);
+            color: #4b5563;
+            font-weight: 700;
             font-size: 0.95rem;
             padding: 12px 24px;
             border-radius: 8px;
@@ -118,31 +161,51 @@
             display: inline-flex;
             justify-content: center;
             align-items: center;
+            transition: background-color 0.2s;
             width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
         .btn-custom-secondary:hover {
-            background-color: #cbd5e1;
-            color: #1e293b;
+            background-color: #e5e7eb;
+            color: var(--benilde-dark);
         }
 
+        /* Action Buttons (Table Rows) */
         .action-btn {
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 6px;
+            border-radius: 8px;
             transition: all 0.2s;
-            border: 1.5px solid transparent;
+            border: none;
             cursor: pointer;
         }
 
-        .action-btn-edit { background-color: #fef3c7; color: #d97706; }
-        .action-btn-edit:hover { background-color: #fcd34d; transform: scale(1.05); }
-        .action-btn-delete { background-color: #fee2e2; color: #dc2626; }
-        .action-btn-delete:hover { background-color: #fca5a5; transform: scale(1.05); }
+        .action-btn-edit {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
 
+        .action-btn-edit:hover {
+            background-color: #fcd34d;
+            transform: scale(1.05);
+        }
+
+        .action-btn-delete {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .action-btn-delete:hover {
+            background-color: #fca5a5;
+            transform: scale(1.05);
+        }
+
+        /* Table Aesthetics */
         .table-responsive {
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -150,8 +213,12 @@
             background: #ffffff;
         }
 
+        .table {
+            margin-bottom: 0;
+        }
+
         .table thead th {
-            background-color: #f8fafc;
+            background-color: #f9fafb;
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -161,34 +228,60 @@
             padding: 16px 20px;
         }
 
+        .table tbody td {
+            padding: 16px 20px;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
         .id-badge {
-            background: #f1f5f9;
-            color: #475569;
+            background: var(--benilde-green-light);
+            color: var(--benilde-green-hover);
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Custom Dynamic Alert Boxes */
+        .alert-success {
+            background-color: var(--benilde-green-light);
+            border-color: rgba(0, 168, 89, 0.2);
+            color: var(--benilde-green-hover);
             font-weight: 600;
         }
     </style>
 </head>
 <body>
 
+    <!-- Navigation Header -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-5">
         <div class="container">
-            <span class="navbar-brand mb-0 h1"><i class="fas fa-graduation-cap me-2"></i>Student List</span>
+            <span class="navbar-brand mb-0">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoXiyEGR1pSzAw5R2ZOUQ_IAXJ-xJG11J_Ope3EPy7jQ&s" alt="Benilde Logo" class="navbar-logo">
+                <div>
+                    <span class="navbar-brand-text">College of Saint Benilde</span>
+                    <span class="navbar-brand-subtext">Manila &bull; Student Directory</span>
+                </div>
+            </span>
         </div>
     </nav>
 
     <div class="container">
         <div class="row g-4">
             
-            <!--Left Form-->
+            <!-- Left Grid Pane: Interactive Input Console -->
             <div class="col-lg-4">
                 <div class="custom-card">
                     <h4 class="card-header-title mb-4" id="form-title">
-                        <i class="fas fa-user-plus text-primary me-2"></i>Register New Student
+                        <i class="fas fa-user-plus text-success me-2"></i>Register Student
                     </h4>
 
+                    <!-- Dynamic Feedback Notifications -->
                     <div id="alert-box" class="alert d-none align-items-center mb-3" role="alert">
                         <i class="fas id-icon me-2"></i> <span id="alert-msg"></span>
                     </div>
@@ -197,18 +290,18 @@
                         <input type="hidden" id="student-id" value="">
                         
                         <div class="mb-3">
-                            <label for="name" class="form-label">FULL NAME</label>
+                            <label for="name" class="form-label">STUDENT FULL NAME</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input type="text" class="form-control" id="name" placeholder="John Doe" required>
+                                <input type="text" class="form-control" id="name" placeholder="E.g., John Doe" required>
                             </div>
                         </div>
 
                         <div class="mb-4">
-                            <label for="course" class="form-label">COURSE</label>
+                            <label for="course" class="form-label">DEGREE PROGRAM / COURSE</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-book-open"></i></span>
-                                <input type="text" class="form-control" id="course" placeholder="BS Information Technology" required>
+                                <input type="text" class="form-control" id="course" placeholder="E.g., BS Information Technology" required>
                             </div>
                         </div>
 
@@ -219,10 +312,12 @@
                 </div>
             </div>
 
-            <!--Right Table-->
+            <!-- Right Grid Pane: Real-Time Sheets Student Directory Display -->
             <div class="col-lg-8">
                 <div class="custom-card">
-                    <h4 class="card-header-title mb-4"><i class="fas fa-database text-primary me-2"></i>Registered Student Directory</h4>
+                    <h4 class="card-header-title mb-4">
+                        <i class="fas fa-database text-success me-2"></i>Student Database
+                    </h4>
                     
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
@@ -230,14 +325,14 @@
                                 <tr>
                                     <th scope="col" style="width: 15%;">ID</th>
                                     <th scope="col" style="width: 40%;">Student Name</th>
-                                    <th scope="col" style="width: 30%;">Course / Track</th>
+                                    <th scope="col" style="width: 30%;">Program / Course</th>
                                     <th scope="col" class="text-center" style="width: 15%;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="student-table-body">
                                 <tr>
                                     <td colspan="4" class="text-center py-5 text-secondary">
-                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div> Loading records...
+                                        <div class="spinner-border text-success spinner-border-sm me-2" role="status"></div> Synching with Google Sheets...
                                     </td>
                                 </tr>
                             </tbody>
@@ -249,14 +344,18 @@
         </div>
     </div>
 
+    <!-- Bootstrap 5 JavaScript Bundle CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Client-Side Serverless Interactive Controller -->
     <script>
-        // Active Google Web App URL
+        // Set Active API Handshake Address
         const API_URL = "https://script.google.com/macros/s/AKfycbwWuiV1qxeHqCVVcuQKv3vvhTEoIB8WY36kKTNgnEiRnq4JvebRN5fJ5Xs7CYBHAu1O/exec";
 
         let studentsList = [];
-        let alertTimeout = null; // Global variable to track active timer
+        let alertTimeout = null;
 
-        // Load records immediately
+        // Initialize Data Load Sync
         document.addEventListener("DOMContentLoaded", fetchStudents);
 
         async function fetchStudents() {
@@ -265,7 +364,7 @@
                 studentsList = await response.json();
                 renderTable();
             } catch (err) {
-                showAlert("danger", "Failed to load directory data.");
+                showAlert("danger", "Could not synchronize with Benilde Database.");
             }
         }
 
@@ -274,21 +373,21 @@
             tbody.innerHTML = "";
 
             if (studentsList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-secondary"><i class="fas fa-info-circle me-2"></i>No records found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-secondary"><i class="fas fa-info-circle me-2"></i>No registered records found in the directory.</td></tr>`;
                 return;
             }
 
-            // Display newest at the top
+            // Display latest records first
             [...studentsList].reverse().forEach(student => {
                 tbody.innerHTML += `
                     <tr>
                         <td><span class="id-badge">#${student.id}</span></td>
-                        <td><strong class="fw-semibold">${student.name}</strong></td>
-                        <td><span class="text-secondary">${student.course}</span></td>
+                        <td><strong class="fw-semibold text-dark">${student.name}</strong></td>
+                        <td><span class="text-secondary fw-medium">${student.course}</span></td>
                         <td class="text-center">
                             <div class="d-inline-flex gap-2">
-                                <span onclick="editStudent(${student.id})" class="action-btn action-btn-edit" title="Edit"><i class="fas fa-edit"></i></span>
-                                <span onclick="deleteStudent(${student.id})" class="action-btn action-btn-delete" title="Delete"><i class="fas fa-trash-alt"></i></span>
+                                <span onclick="editStudent(${student.id})" class="action-btn action-btn-edit" title="Modify Record"><i class="fas fa-edit"></i></span>
+                                <span onclick="deleteStudent(${student.id})" class="action-btn action-btn-delete" title="Remove Record"><i class="fas fa-trash-alt"></i></span>
                             </div>
                         </td>
                     </tr>
@@ -302,14 +401,15 @@
             const name = document.getElementById("name").value.trim();
             const course = document.getElementById("course").value.trim();
 
+            // Client Validation Checks
             if (!name || !course) {
-                showAlert("danger", "All fields are required!");
+                showAlert("danger", "All registration inputs are required.");
                 return;
             }
 
             const namePattern = /^[a-zA-Z\s.]+$/;
             if (!namePattern.test(name)) {
-                showAlert("danger", "Name should only contain letters, spaces, or periods!");
+                showAlert("danger", "Name should only contain alphabet characters, spaces, or periods.");
                 return;
             }
 
@@ -317,7 +417,7 @@
                 ? { action: "update", id: parseInt(id), name, course }
                 : { action: "create", name, course };
 
-            showAlert("warning", "Saving record...");
+            showAlert("info", "Processing transaction with database...");
 
             try {
                 const response = await fetch(API_URL, {
@@ -328,14 +428,13 @@
 
                 if (result.status === "success") {
                     resetForm();
-                    // Fetch and show success message AFTER state has completely reset
                     await fetchStudents();
                     showAlert("success", id ? "Record updated successfully!" : "Student registered successfully!");
                 } else {
                     showAlert("danger", result.msg);
                 }
             } catch (err) {
-                showAlert("danger", "Could not connect to database.");
+                showAlert("danger", "Database transaction failed. Please retry.");
             }
         });
 
@@ -347,7 +446,7 @@
             document.getElementById("name").value = student.name;
             document.getElementById("course").value = student.course;
 
-            document.getElementById("form-title").innerHTML = `<i class="fas fa-user-edit text-warning me-2"></i>Modify Student Record`;
+            document.getElementById("form-title").innerHTML = `<i class="fas fa-user-edit text-warning me-2"></i>Modify Record`;
             document.getElementById("form-actions").innerHTML = `
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn-custom-primary" style="background-color: #d97706;"><i class="fas fa-save me-1"></i> Save Changes</button>
@@ -357,8 +456,8 @@
         }
 
         async function deleteStudent(id) {
-            if (!confirm("Are you sure you want to delete this student record?")) return;
-            showAlert("warning", "Deleting record...");
+            if (!confirm("Confirm deleting this student record? This action is immediate and cannot be undone.")) return;
+            showAlert("info", "Deleting record...");
 
             try {
                 const response = await fetch(API_URL, {
@@ -368,13 +467,14 @@
                 const result = await response.json();
 
                 if (result.status === "success") {
-                    showAlert("success", "Student record deleted!");
-                    fetchStudents();
+                    resetForm();
+                    await fetchStudents();
+                    showAlert("success", "Student record deleted successfully!");
                 } else {
                     showAlert("danger", result.msg);
                 }
             } catch (err) {
-                showAlert("danger", "Could not delete record.");
+                showAlert("danger", "Database was unable to delete this entry.");
             }
         }
 
@@ -382,27 +482,25 @@
             document.getElementById("student-id").value = "";
             document.getElementById("name").value = "";
             document.getElementById("course").value = "";
-            document.getElementById("form-title").innerHTML = `<i class="fas fa-user-plus text-primary me-2"></i>Register New Student`;
+            document.getElementById("form-title").innerHTML = `<i class="fas fa-user-plus text-success me-2"></i>Register Student`;
             document.getElementById("form-actions").innerHTML = `<button type="submit" class="btn-custom-primary"><i class="fas fa-plus-circle me-1"></i> Add Student</button>`;
         }
 
-        // Upgraded alert utility to cleanly manage timeouts and ensure dismissal
+        // Alert Manager with 5-second Auto-Dismiss for Success
         function showAlert(type, msg) {
             const alertBox = document.getElementById("alert-box");
             const alertMsg = document.getElementById("alert-msg");
             
-            // Clear any active timers to prevent overlapping intervals
             if (alertTimeout) {
                 clearTimeout(alertTimeout);
                 alertTimeout = null;
             }
 
-            // Cleanly toggle display utility classes
             alertBox.classList.remove("d-none", "alert-success", "alert-danger", "alert-warning", "alert-info");
             alertBox.classList.add(`alert-${type}`, "d-flex");
             alertMsg.textContent = msg;
 
-            // Automatically dismiss success and warning notifications
+            // Trigger timer auto-hide for success alerts only
             if (type === "success") {
                 alertTimeout = setTimeout(() => {
                     alertBox.classList.remove("d-flex");
