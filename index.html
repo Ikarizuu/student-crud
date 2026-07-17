@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Sheet CRUD System</title>
+    <title>Student List CRUD System</title>
     <!--Bootstrap 5 CSS CDN-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!--Font Awesome Icons-->
@@ -175,7 +175,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-5">
         <div class="container">
-            <span class="navbar-brand mb-0 h1"><i class="fas fa-graduation-cap me-2"></i>Student Sheet Portal (Serverless)</span>
+            <span class="navbar-brand mb-0 h1"><i class="fas fa-graduation-cap me-2"></i>Student List</span>
         </div>
     </nav>
 
@@ -250,10 +250,11 @@
     </div>
 
     <script>
-        // REPLACE WITH YOUR ACTUAL GOOGLE WEB APP URL
+        // Active Google Web App URL
         const API_URL = "https://script.google.com/macros/s/AKfycbwWuiV1qxeHqCVVcuQKv3vvhTEoIB8WY36kKTNgnEiRnq4JvebRN5fJ5Xs7CYBHAu1O/exec";
 
         let studentsList = [];
+        let alertTimeout = null; // Global variable to track active timer
 
         // Load records immediately
         document.addEventListener("DOMContentLoaded", fetchStudents);
@@ -326,9 +327,10 @@
                 const result = await response.json();
 
                 if (result.status === "success") {
-                    showAlert("success", id ? "Record updated successfully!" : "Student registered successfully!");
                     resetForm();
-                    fetchStudents();
+                    // Fetch and show success message AFTER state has completely reset
+                    await fetchStudents();
+                    showAlert("success", id ? "Record updated successfully!" : "Student registered successfully!");
                 } else {
                     showAlert("danger", result.msg);
                 }
@@ -384,12 +386,29 @@
             document.getElementById("form-actions").innerHTML = `<button type="submit" class="btn-custom-primary"><i class="fas fa-plus-circle me-1"></i> Add Student</button>`;
         }
 
+        // Upgraded alert utility to cleanly manage timeouts and ensure dismissal
         function showAlert(type, msg) {
             const alertBox = document.getElementById("alert-box");
             const alertMsg = document.getElementById("alert-msg");
             
-            alertBox.className = `alert alert-${type} d-flex align-items-center mb-3`;
+            // Clear any active timers to prevent overlapping intervals
+            if (alertTimeout) {
+                clearTimeout(alertTimeout);
+                alertTimeout = null;
+            }
+
+            // Cleanly toggle display utility classes
+            alertBox.classList.remove("d-none", "alert-success", "alert-danger", "alert-warning", "alert-info");
+            alertBox.classList.add(`alert-${type}`, "d-flex");
             alertMsg.textContent = msg;
+
+            // Automatically dismiss success and warning notifications
+            if (type === "success") {
+                alertTimeout = setTimeout(() => {
+                    alertBox.classList.remove("d-flex");
+                    alertBox.classList.add("d-none");
+                }, 5000); 
+            }
         }
     </script>
 </body>
