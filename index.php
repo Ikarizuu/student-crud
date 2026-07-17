@@ -1,99 +1,3 @@
-<?php
-//Start session (to track flash messages)
-session_start();
-include 'config.php';
-
-$error = "";
-$message = "";
-
-//Retrieve pending flash status parameters from global session state
-if (isset($_SESSION['msg'])) {
-    $message = $_SESSION['msg'];
-    unset($_SESSION['msg']);
-}
-if (isset($_SESSION['err'])) {
-    $error = $_SESSION['err'];
-    unset($_SESSION['err']);
-}
-
-//================CREATE FUNCTION===============
-if (isset($_POST['submit'])) {
-    $name = trim($_POST['name'] ?? '');
-    $course = trim($_POST['course'] ?? '');
-
-    if ($name == "" || $course == "") {
-        $_SESSION['err'] = "All fields are required!";
-        header("Location: index.php");
-        exit();
-    } else {
-        $response = callGoogleSheetAPI([
-            'action' => 'create',
-            'name' => $name,
-            'course' => $course
-        ], true);
-
-        if (isset($response['status']) && $response['status'] === "success") {
-            $_SESSION['msg'] = "Student record created successfully!";
-        } else {
-            $_SESSION['err'] = "Failed to write to Google Sheets.";
-        }
-        header("Location: index.php");
-        exit();
-    }
-}
-
-//================UPDATE FUNCTION===============
-if (isset($_POST['update'])) {
-    $id = intval($_POST['student_id'] ?? 0);
-    $name = trim($_POST['name'] ?? '');
-    $course = trim($_POST['course'] ?? '');
-
-    if ($name == "" || $course == "") {
-        $_SESSION['err'] = "All update parameters are required!";
-        header("Location: index.php");
-        exit();
-    } else {
-        $response = callGoogleSheetAPI([
-            'action' => 'update',
-            'id' => $id,
-            'name' => $name,
-            'course' => $course
-        ], true);
-
-        if (isset($response['status']) && $response['status'] === "success") {
-            $_SESSION['msg'] = "Student record updated successfully!";
-        } else {
-            $_SESSION['err'] = "Failed to update Google Sheets.";
-        }
-        header("Location: index.php");
-        exit();
-    }
-}
-
-//Fetch students array from Google Sheets (GET request)
-$students = callGoogleSheetAPI(['action' => 'read'], false);
-if (!is_array($students)) {
-    $students = [];
-}
-
-//Fetch operational load for edit initialization
-$edit_mode = false;
-$edit_id = "";
-$edit_name = "";
-$edit_course = "";
-if (isset($_GET['edit'])) {
-    $edit_mode = true;
-    $id = intval($_GET['edit']);
-    foreach ($students as $row) {
-        if (isset($row['id']) && intval($row['id']) === $id) {
-            $edit_id = $row['id'];
-            $edit_name = $row['name'];
-            $edit_course = $row['course'];
-            break;
-        }
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -124,7 +28,6 @@ if (isset($_GET['edit'])) {
             min-height: 100vh;
         }
 
-        /*Navigation Bar Design*/
         .navbar-custom {
             background-color: #0f172a !important;
             padding: 16px 0;
@@ -137,7 +40,6 @@ if (isset($_GET['edit'])) {
             letter-spacing: -0.02em;
         }
 
-        /*Polished Cards Framework*/
         .custom-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -159,7 +61,6 @@ if (isset($_GET['edit'])) {
             color: var(--text-main);
         }
 
-        /*Form Inputs Custom Styling*/
         .form-label {
             font-size: 0.85rem;
             font-weight: 600;
@@ -173,8 +74,6 @@ if (isset($_GET['edit'])) {
             border-right: none;
             color: var(--text-muted);
             border-radius: 8px 0 0 8px;
-            padding-left: 14px;
-            padding-right: 14px;
         }
 
         .form-control {
@@ -183,7 +82,6 @@ if (isset($_GET['edit'])) {
             padding: 11px 14px;
             font-size: 0.95rem;
             color: var(--text-main);
-            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .form-control:focus {
@@ -192,7 +90,6 @@ if (isset($_GET['edit'])) {
             outline: none;
         }
 
-        /*Modern Custom Action Buttons*/
         .btn-custom-primary {
             background-color: var(--primary-accent);
             border: none;
@@ -221,7 +118,6 @@ if (isset($_GET['edit'])) {
             display: inline-flex;
             justify-content: center;
             align-items: center;
-            transition: background-color 0.2s;
             width: 100%;
         }
 
@@ -230,7 +126,6 @@ if (isset($_GET['edit'])) {
             color: #1e293b;
         }
 
-        /*Sleek Action Icons*/
         .action-btn {
             width: 34px;
             height: 34px;
@@ -240,38 +135,19 @@ if (isset($_GET['edit'])) {
             border-radius: 6px;
             transition: all 0.2s;
             border: 1.5px solid transparent;
+            cursor: pointer;
         }
 
-        .action-btn-edit {
-            background-color: #fef3c7;
-            color: #d97706;
-        }
+        .action-btn-edit { background-color: #fef3c7; color: #d97706; }
+        .action-btn-edit:hover { background-color: #fcd34d; transform: scale(1.05); }
+        .action-btn-delete { background-color: #fee2e2; color: #dc2626; }
+        .action-btn-delete:hover { background-color: #fca5a5; transform: scale(1.05); }
 
-        .action-btn-edit:hover {
-            background-color: #fcd34d;
-            transform: scale(1.05);
-        }
-
-        .action-btn-delete {
-            background-color: #fee2e2;
-            color: #dc2626;
-        }
-
-        .action-btn-delete:hover {
-            background-color: #fca5a5;
-            transform: scale(1.05);
-        }
-
-        /*Table Refinements*/
         .table-responsive {
             border: 1px solid var(--border-color);
             border-radius: 12px;
             overflow: hidden;
             background: #ffffff;
-        }
-
-        .table {
-            margin-bottom: 0;
         }
 
         .table thead th {
@@ -283,16 +159,6 @@ if (isset($_GET['edit'])) {
             color: var(--text-muted);
             border-bottom: 1.5px solid var(--border-color);
             padding: 16px 20px;
-        }
-
-        .table tbody td {
-            padding: 16px 20px;
-            color: var(--text-main);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .table tbody tr:last-child td {
-            border-bottom: none;
         }
 
         .id-badge {
@@ -307,51 +173,34 @@ if (isset($_GET['edit'])) {
 </head>
 <body>
 
-    <!--Navigation Bar Component-->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-5">
         <div class="container">
-            <span class="navbar-brand mb-0 h1"><i class="fas fa-graduation-cap me-2"></i>Student List Portal</span>
+            <span class="navbar-brand mb-0 h1"><i class="fas fa-graduation-cap me-2"></i>Student Sheet Portal (Serverless)</span>
         </div>
     </nav>
 
     <div class="container">
         <div class="row g-4">
             
-            <!--Left Grid: Registration Form Area (Create/Update)-->
+            <!--Left Form-->
             <div class="col-lg-4">
                 <div class="custom-card">
-                    <h4 class="card-header-title mb-4">
-                        <i class="fas <?= $edit_mode ? 'fa-user-edit text-warning' : 'fa-user-plus text-primary' ?> me-2"></i>
-                        <?= $edit_mode ? 'Modify Student Record' : 'Register New Student' ?>
+                    <h4 class="card-header-title mb-4" id="form-title">
+                        <i class="fas fa-user-plus text-primary me-2"></i>Register New Student
                     </h4>
 
-                    <!--Alert dialog banner-->
-                    <div id="js-error-alert" class="alert alert-danger align-items-center mb-3 d-none" role="alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i> <span id="js-error-msg"></span>
+                    <div id="alert-box" class="alert d-none align-items-center mb-3" role="alert">
+                        <i class="fas id-icon me-2"></i> <span id="alert-msg"></span>
                     </div>
 
-                    <?php if (!empty($error)): ?>
-                        <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
-                            <i class="fas fa-exclamation-triangle me-2"></i> <?= htmlentities($error) ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($message)): ?>
-                        <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
-                            <i class="fas fa-check-circle me-2"></i> <?= htmlentities($message) ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <form action="index.php" method="POST" onsubmit="return validateBootstrapForm()" novalidate>
-                        <?php if ($edit_mode): ?>
-                            <input type="hidden" name="student_id" value="<?= $edit_id ?>">
-                        <?php endif; ?>
-
+                    <form id="student-form" novalidate>
+                        <input type="hidden" id="student-id" value="">
+                        
                         <div class="mb-3">
                             <label for="name" class="form-label">FULL NAME</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input type="text" class="form-control" id="name" name="name" placeholder="John Doe" value="<?= htmlentities($edit_name) ?>" required>
+                                <input type="text" class="form-control" id="name" placeholder="John Doe" required>
                             </div>
                         </div>
 
@@ -359,23 +208,18 @@ if (isset($_GET['edit'])) {
                             <label for="course" class="form-label">COURSE</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-book-open"></i></span>
-                                <input type="text" class="form-control" id="course" name="course" placeholder="BS Information Technology" value="<?= htmlentities($edit_course) ?>" required>
+                                <input type="text" class="form-control" id="course" placeholder="BS Information Technology" required>
                             </div>
                         </div>
 
-                        <?php if ($edit_mode): ?>
-                            <div class="d-flex gap-2">
-                                <button type="submit" name="update" class="btn-custom-primary" style="background-color: #d97706;"><i class="fas fa-save me-1"></i> Save Changes</button>
-                                <a href="index.php" class="btn-custom-secondary"><i class="fas fa-times-circle me-1"></i> Cancel</a>
-                            </div>
-                        <?php else: ?>
-                            <button type="submit" name="submit" class="btn-custom-primary"><i class="fas fa-plus-circle me-1"></i> Add Student</button>
-                        <?php endif; ?>
+                        <div id="form-actions">
+                            <button type="submit" class="btn-custom-primary"><i class="fas fa-plus-circle me-1"></i> Add Student</button>
+                        </div>
                     </form>
                 </div>
             </div>
 
-            <!--Right Grid: Master Directory Table Display-->
+            <!--Right Table-->
             <div class="col-lg-8">
                 <div class="custom-card">
                     <h4 class="card-header-title mb-4"><i class="fas fa-database text-primary me-2"></i>Registered Student Directory</h4>
@@ -390,28 +234,12 @@ if (isset($_GET['edit'])) {
                                     <th scope="col" class="text-center" style="width: 15%;">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <?php
-                                if (count($students) > 0) {
-                                    // Loop through array elements in reverse to display latest entries on top
-                                    foreach (array_reverse($students) as $row) {
-                                        if (!isset($row['id'])) continue;
-                                        echo "<tr>";
-                                        echo "<td><span class='id-badge'>#" . htmlentities($row['id']) . "</span></td>";
-                                        echo "<td><strong class='fw-semibold'>" . htmlentities($row['name'] ?? '') . "</strong></td>";
-                                        echo "<td><span class='text-secondary'>" . htmlentities($row['course'] ?? '') . "</span></td>";
-                                        echo "<td class='text-center'>
-                                                <div class='d-inline-flex gap-2'>
-                                                    <a href='index.php?edit=" . $row['id'] . "' class='action-btn action-btn-edit' title='Edit student'><i class='fas fa-edit'></i></a>
-                                                    <a href='delete.php?id=" . $row['id'] . "' class='action-btn action-btn-delete' title='Delete student' onclick='return confirm(\"Are you sure you want to delete this student record?\");'><i class='fas fa-trash-alt'></i></a>
-                                                </div>
-                                              </td>";
-                                        echo "</tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='4' class='text-center py-5 text-secondary'><i class='fas fa-info-circle me-2'></i>No student records found in the directory.</td></tr>";
-                                }
-                                ?>
+                            <tbody id="student-table-body">
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-secondary">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div> Loading records...
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -421,49 +249,158 @@ if (isset($_GET['edit'])) {
         </div>
     </div>
 
-    <!--Bootstrap 5 JavaScript Bundle CDN-->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!--Client-Side JavaScript Form Validation-->
     <script>
-    function validateBootstrapForm() {
-        const nameField = document.getElementById("name");
-        const courseField = document.getElementById("course");
-        const alertBox = document.getElementById("js-error-alert");
-        const alertMsg = document.getElementById("js-error-msg");
+        // Active Google Web App URL
+        const API_URL = "https://script.google.com/macros/s/AKfycbwWuiV1qxeHqCVVcuQKv3vvhTEoIB8WY36kKTNgnEiRnq4JvebRN5fJ5Xs7CYBHAu1O/exec";
 
-        const nameValue = nameField.value.trim();
-        const courseValue = courseField.value.trim();
+        let studentsList = [];
 
-        // 1. Check for empty inputs (Challenge requirement)
-        if (nameValue === "" || courseValue === "") {
-            alertMsg.textContent = "Please fill out all input fields!";
-            alertBox.classList.remove("d-none");
-            alertBox.classList.add("d-flex");
-            return false;
+        // Load records immediately
+        document.addEventListener("DOMContentLoaded", fetchStudents);
+
+        async function fetchStudents() {
+            try {
+                const response = await fetch(`${API_URL}?action=read`);
+                studentsList = await response.json();
+                renderTable();
+            } catch (err) {
+                showAlert("danger", "Failed to load directory data.");
+            }
         }
 
-        // 2. Name validation: Ensure it contains only letters, spaces, or periods
-        const namePattern = /^[a-zA-Z\s.]+$/;
-        if (!namePattern.test(nameValue)) {
-            alertMsg.textContent = "Name should only contain letters, spaces, or periods!";
-            alertBox.classList.remove("d-none");
-            alertBox.classList.add("d-flex");
-            return false;
+        function renderTable() {
+            const tbody = document.getElementById("student-table-body");
+            tbody.innerHTML = "";
+
+            if (studentsList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-secondary"><i class="fas fa-info-circle me-2"></i>No records found.</td></tr>`;
+                return;
+            }
+
+            // Display newest at the top
+            [...studentsList].reverse().forEach(student => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="id-badge">#${student.id}</span></td>
+                        <td><strong class="fw-semibold">${student.name}</strong></td>
+                        <td><span class="text-secondary">${student.course}</span></td>
+                        <td class="text-center">
+                            <div class="d-inline-flex gap-2">
+                                <span onclick="editStudent(${student.id})" class="action-btn action-btn-edit" title="Edit"><i class="fas fa-edit"></i></span>
+                                <span onclick="deleteStudent(${student.id})" class="action-btn action-btn-delete" title="Delete"><i class="fas fa-trash-alt"></i></span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
         }
 
-        // 3. Length check
-        if (nameValue.length < 2) {
-            alertMsg.textContent = "Name is too short! It must be at least 2 characters.";
-            alertBox.classList.remove("d-none");
-            alertBox.classList.add("d-flex");
-            return false;
+        document.getElementById("student-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const id = document.getElementById("student-id").value;
+            const name = document.getElementById("name").value.trim();
+            const course = document.getElementById("course").value.trim();
+
+            if (!name || !course) {
+                showAlert("danger", "All fields are required!");
+                return;
+            }
+
+            const namePattern = /^[a-zA-Z\s.]+$/;
+            if (!namePattern.test(name)) {
+                showAlert("danger", "Name should only contain letters, spaces, or periods!");
+                return;
+            }
+
+            const payload = id 
+                ? { action: "update", id: parseInt(id), name, course }
+                : { action: "create", name, course };
+
+            showAlert("warning", "Saving record...");
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    showAlert("success", id ? "Record updated successfully!" : "Student registered successfully!");
+                    resetForm();
+                    fetchStudents();
+                } else {
+                    showAlert("danger", result.msg);
+                }
+            } catch (err) {
+                showAlert("danger", "Could not connect to database.");
+            }
+        });
+
+        function editStudent(id) {
+            const student = studentsList.find(s => s.id === id);
+            if (!student) return;
+
+            document.getElementById("student-id").value = student.id;
+            document.getElementById("name").value = student.name;
+            document.getElementById("course").value = student.course;
+
+            document.getElementById("form-title").innerHTML = `<i class="fas fa-user-edit text-warning me-2"></i>Modify Student Record`;
+            document.getElementById("form-actions").innerHTML = `
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-custom-primary" style="background-color: #d97706;"><i class="fas fa-save me-1"></i> Save Changes</button>
+                    <button type="button" onclick="resetForm()" class="btn-custom-secondary"><i class="fas fa-times-circle me-1"></i> Cancel</button>
+                </div>
+            `;
         }
 
-        alertBox.classList.remove("d-flex");
-        alertBox.classList.add("d-none");
-        return true;
-    }
+        async function deleteStudent(id) {
+            if (!confirm("Are you sure you want to delete this student record?")) return;
+            showAlert("warning", "Deleting record...");
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "delete", id: id })
+                });
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    showAlert("success", "Student record deleted!");
+                    fetchStudents();
+                } else {
+                    showAlert("danger", result.msg);
+                }
+            } catch (err) {
+                showAlert("danger", "Could not delete record.");
+            }
+        }
+
+        function resetForm() {
+            document.getElementById("student-id").value = "";
+            document.getElementById("name").value = "";
+            document.getElementById("course").value = "";
+            document.getElementById("form-title").innerHTML = `<i class="fas fa-user-plus text-primary me-2"></i>Register New Student`;
+            document.getElementById("form-actions").innerHTML = `<button type="submit" class="btn-custom-primary"><i class="fas fa-plus-circle me-1"></i> Add Student</button>`;
+        }
+
+        // Modified alert utility to auto-hide success cards after 5 seconds
+        function showAlert(type, msg) {
+            const alertBox = document.getElementById("alert-box");
+            const alertMsg = document.getElementById("alert-msg");
+            
+            // Apply standard Bootstrap validation alert layouts
+            alertBox.className = `alert alert-${type} d-flex align-items-center mb-3`;
+            alertMsg.textContent = msg;
+
+            // Automatically transition away if successful
+            if (type === "success") {
+                setTimeout(() => {
+                    alertBox.classList.remove("d-flex");
+                    alertBox.classList.add("d-none");
+                }, 5000); 
+            }
+        }
     </script>
 </body>
 </html>
